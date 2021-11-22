@@ -11,8 +11,9 @@ const { check } = require('../src/check-repo-deps')
 const curPath = pathToUnixPath(process.cwd())
 const configPath = curPath + '/check-repo-deps.config.js'
 
+let options
 try {
-    const options = require(configPath)
+    options = require(configPath)
 } catch (e) {
     console.error(`Cannot find config file in ${configPath}`)
 }
