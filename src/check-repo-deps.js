@@ -15,8 +15,14 @@ function check(options) {
         allowedDevDeps = [],
         withoutDev = true,
         ignoreDirs = [],
-        ignoreMatches = []
+        ignoreMatches = [],
+        namespace,
+        innerDepsType = 'strict'
     } = options
+
+    if (!namespace) {
+        throw new Error(`Namespace is not defined in config`)
+    }
 
     const depCheckOptions = {
         withoutDev,
@@ -40,14 +46,20 @@ function check(options) {
         const packageName = packageDir.slice(packageDir.lastIndexOf('/') + 1)
 
         const pkg = require(path.resolve(file))
+
+        if (pkg.private) {
+            return
+        }
         if (pkg.devDependencies && allowedDevDeps.indexOf(packageName) === -1) {
             incorrectDepsTypes.push(`${packageName} - devDependencies found`)
         }
         if (pkg.dependencies) {
             Object.keys(pkg.dependencies).forEach((depName) => {
-                if (depName.indexOf('@tinkoff-fb') !== -1) {
+                if (depName.indexOf(namespace) !== -1) {
                     const depVersion = pkg.dependencies[depName]
-                    if (depVersion.indexOf('^') !== -1) {
+                    if (innerDepsType === 'strict' && depVersion.indexOf('^') !== -1
+                        || innerDepsType === '^' && depVersion.indexOf('^') === -1)
+                    {
                         incorrectDepsTypes.push(`${packageName} - ${depName}: ${depVersion}`)
                     }
                 }
@@ -106,7 +118,7 @@ function check(options) {
         // eslint-disable-next-line no-console
         incorrectDepsTypes.forEach((errorText) => console.error('   ' + errorText))
         // eslint-disable-next-line no-console
-        console.error("Inner dependencies '^x.x.x' and devDependencies in inner packages are not allowed")
+        console.error(`Inner dependencies '${innerDepsType === 'strict' ? '^' : ''}x.x.x' and devDependencies in inner packages are not allowed`)
         process.exit(1)
     }
 
