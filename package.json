@@ -1,6 +1,6 @@
 {
   "name": "check-repo-deps",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Package for checking dependencies in packages in monorepo",
   "main": "bin/check-repo-deps.js",
   "bin": {
@@ -10,7 +10,7 @@
   "author": "Ilrilan <ilrilan2@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "depcheck": "^1.2.0",
+    "depcheck": "^1.4.3",
     "glob": "^7.2.0"
   }
 }

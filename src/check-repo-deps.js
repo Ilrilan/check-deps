@@ -17,7 +17,9 @@ function check(options) {
         ignoreDirs = [],
         ignoreMatches = [],
         namespace,
-        innerDepsType = 'strict'
+        innerDepsType = 'strict',
+        strictDepsPathPatterns = [],
+        minorDepsPathPatterns = [],
     } = options
 
     if (!namespace) {
@@ -57,8 +59,15 @@ function check(options) {
             Object.keys(pkg.dependencies).forEach((depName) => {
                 if (depName.indexOf(namespace) !== -1) {
                     const depVersion = pkg.dependencies[depName]
-                    if (innerDepsType === 'strict' && depVersion.indexOf('^') !== -1
-                        || innerDepsType === '^' && depVersion.indexOf('^') === -1)
+                    let localInnerDepsType = innerDepsType
+                    if (strictDepsPathPatterns.some(pattern => packageDir.indexOf(pattern) !== -1)) {
+                        localInnerDepsType = 'strict'
+                    }
+                    if (minorDepsPathPatterns.some(pattern => packageDir.indexOf(pattern) !== -1)) {
+                        localInnerDepsType = '^'
+                    }
+                    if (localInnerDepsType === 'strict' && depVersion.indexOf('^') !== -1
+                        || localInnerDepsType === '^' && depVersion.indexOf('^') === -1)
                     {
                         incorrectDepsTypes.push(`${packageName} - ${depName}: ${depVersion}`)
                     }
@@ -117,8 +126,6 @@ function check(options) {
         console.error('Packages has incorrect dependencies types: ')
         // eslint-disable-next-line no-console
         incorrectDepsTypes.forEach((errorText) => console.error('   ' + errorText))
-        // eslint-disable-next-line no-console
-        console.error(`Inner dependencies '${innerDepsType === 'strict' ? '^' : ''}x.x.x' and devDependencies in inner packages are not allowed`)
         process.exit(1)
     }
 
