@@ -20,6 +20,7 @@ function check(options) {
         innerDepsType = 'strict',
         strictDepsPathPatterns = [],
         minorDepsPathPatterns = [],
+        ignoreDepsTypePatterns = [],
     } = options
 
     if (!namespace) {
@@ -55,7 +56,7 @@ function check(options) {
         if (pkg.devDependencies && allowedDevDeps.indexOf(packageName) === -1) {
             incorrectDepsTypes.push(`${packageName} - devDependencies found`)
         }
-        if (pkg.dependencies) {
+        if (pkg.dependencies && !ignoreDepsTypePatterns.some(pattern => packageDir.indexOf(pattern) !== -1)) {
             Object.keys(pkg.dependencies).forEach((depName) => {
                 if (depName.indexOf(namespace) !== -1) {
                     const depVersion = pkg.dependencies[depName]
